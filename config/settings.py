@@ -24,6 +24,9 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", [])
 
 SERVICE_NAME = "auth-service"
+# JWT issuer — must equal the KongConsumer jwt credential `key` so Kong picks
+# the right HMAC secret (the shared DJANGO_SECRET_KEY) to verify tokens.
+JWT_ISSUER = env.str("JWT_ISSUER", "ecommerce-auth")
 
 INSTALLED_APPS = [
     "django.contrib.auth",

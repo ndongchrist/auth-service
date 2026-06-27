@@ -11,9 +11,16 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .serializers import RegisterSerializer
+from .tokens import IssuerTokenObtainPairSerializer, issue_for_user
+
+
+class LoginView(TokenObtainPairView):
+    """Issues access/refresh with the iss claim Kong validates."""
+
+    serializer_class = IssuerTokenObtainPairSerializer
 
 
 @api_view(["POST"])
@@ -28,8 +35,5 @@ def register(request: Request) -> Response:
     user = User.objects.create_user(
         username=data["username"], email=data.get("email", ""), password=data["password"]
     )
-    refresh = RefreshToken.for_user(user)
-    return Response(
-        {"user_id": user.id, "access": str(refresh.access_token), "refresh": str(refresh)},
-        status=201,
-    )
+    access, refresh = issue_for_user(user)
+    return Response({"user_id": user.id, "access": access, "refresh": refresh}, status=201)
